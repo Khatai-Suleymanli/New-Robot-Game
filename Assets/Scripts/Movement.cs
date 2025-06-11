@@ -22,7 +22,7 @@ public class Movement : MonoBehaviour
     [SerializeField] float jumpCooldown = 0.2f;
 
     [Header("Crouch")]
-    [SerializeField] float crouchHeight = 1.0f;
+    [SerializeField] float crouchHeight = 1f;
     [SerializeField] float crouchTransitionSpeed = 8f;
 
     [Header("Sprint FOV")]

@@ -17,13 +17,20 @@ public class GuardianMovement : MonoBehaviour
 
     public Transform target; //player
 
-    private float lookRadius = 5f;
+    private float lookRadius = 100f;
+
+    public float viewdotProductValue = 0.65f;
+
+    public LayerMask obstacleMask;
+
+    private Animator animator;
 
 
     void Start()
     {
         // fill the waypaoints array. add waypoints
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
         //currentTarget = waypoints[1];
 
     }
@@ -32,62 +39,36 @@ public class GuardianMovement : MonoBehaviour
     void Update()
     {
         float distance = Vector3.Distance(target.transform.position, transform.position);
-        if (distance < lookRadius) {
+        if (CanSeePlayer())  // if canSee
+        {
             FacePlayer();
             agent.SetDestination(target.transform.position);
+            agent.speed = 6f;
+
+            animator.SetFloat("Speed", 1.5f);
 
         }
-        if (distance > lookRadius) {
+        else
+        {
             FaceWp();
-            if (!agent.pathPending && agent.remainingDistance < 5)
+            if (!agent.pathPending && agent.remainingDistance < 10)
             {
                 waypointIndex = waypointIndex == 0 ? 1 : 0;
                 Move();
             }
-
-
         }
-        
-       /* if (waypointIndex < waypoints.Length)
+        /*if (distance > lookRadius)
         {
+            
 
-            transform.position = Vector3.MoveTowards(transform.position,
-                waypoints[waypointIndex].position, speed * Time.deltaTime);
-
-            if (waypoints[waypointIndex] == null)
-            {
-                return;
-            }
-
-            Vector3 direction = waypoints[waypointIndex].position - transform.position;
-
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-
-            float maxDegreesdlt = rotationSpeed * Time.deltaTime;
-
-
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, maxDegreesdlt);
-
-
-
-            if (Vector3.Distance(this.transform.position, waypoints[waypointIndex].position)
-                < 0.1f && waypointIndex != 1)
-            {
-                waypointIndex++;
-            }
-            else if (Vector3.Distance(this.transform.position, waypoints[waypointIndex].position)
-                < 0.1f && waypointIndex == 1) {
-                waypointIndex--;
-            }
-            else
-            {
-                //enemy will shoot tower
-            }
 
         }*/
+
+        
     }
 
-    void FaceWp() {
+    void FaceWp()
+    {
         Vector3 direction = (waypoints[waypointIndex].transform.position - this.transform.position).normalized;
         direction.y = 0;
 
@@ -111,11 +92,59 @@ public class GuardianMovement : MonoBehaviour
     }
 
 
-    void Move() {
-        if(agent != null && waypoints[waypointIndex] != null ){
+    void Move()
+    {
+        if (agent != null && waypoints[waypointIndex] != null)
+        {
             agent.SetDestination(waypoints[waypointIndex].transform.position);
+            animator.SetFloat("Speed", 0.8f);
 
         }
-    
+
+    }
+
+
+    bool CanSeePlayer()
+    {
+        Vector3 directionToPlayer = (target.position - transform.position).normalized;
+        float distanceToPlayer = Vector3.Distance(target.transform.position, transform.position);
+
+        if (distanceToPlayer > lookRadius)
+        {
+            return false;
+        }
+
+        float dot = Vector3.Dot(transform.forward, directionToPlayer);
+        if (dot < viewdotProductValue)
+        {
+            return false;
+        }
+
+        if (Physics.Raycast(transform.position, directionToPlayer, out RaycastHit hit, lookRadius))
+        {
+            if (hit.transform.CompareTag("Player"))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (target == null) {
+            return;
+        }
+
+        Vector3 guardianPos = transform.position;
+        Vector3 forward = transform.forward;
+
+        Vector3 ToPlayer = (target.position - transform.position).normalized;
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(guardianPos, guardianPos + forward * 2f);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(guardianPos, target.position);
     }
 }
