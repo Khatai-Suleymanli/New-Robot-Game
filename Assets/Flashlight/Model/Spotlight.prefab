@@ -10,11 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 400000}
   - component: {fileID: 10800000}
-<<<<<<< HEAD
   - component: {fileID: 3596388606509958490}
-=======
-  - component: {fileID: 3456223718753347550}
->>>>>>> 84a29d3c1edb7557db63f7eb566cfaba6ad0903b
   m_Layer: 0
   m_Name: Spotlight
   m_TagString: Untagged
@@ -102,11 +98,7 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
-<<<<<<< HEAD
 --- !u!114 &3596388606509958490
-=======
---- !u!114 &3456223718753347550
->>>>>>> 84a29d3c1edb7557db63f7eb566cfaba6ad0903b
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
