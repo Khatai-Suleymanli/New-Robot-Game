@@ -17,13 +17,16 @@ public class GuardianMovement : MonoBehaviour
 
     public Transform target; //player
 
-    private float lookRadius = 5f;
+    private float lookRadius = 10f;
+
+    private Animator animator;
 
 
     void Start()
     {
         // fill the waypaoints array. add waypoints
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
         //currentTarget = waypoints[1];
 
     }
@@ -35,11 +38,14 @@ public class GuardianMovement : MonoBehaviour
         if (distance < lookRadius) {
             FacePlayer();
             agent.SetDestination(target.transform.position);
+            agent.speed = 6f;
+            
+            animator.SetFloat("Speed", 1.5f);
 
         }
         if (distance > lookRadius) {
             FaceWp();
-            if (!agent.pathPending && agent.remainingDistance < 5)
+            if (!agent.pathPending && agent.remainingDistance < 10)
             {
                 waypointIndex = waypointIndex == 0 ? 1 : 0;
                 Move();
@@ -114,6 +120,7 @@ public class GuardianMovement : MonoBehaviour
     void Move() {
         if(agent != null && waypoints[waypointIndex] != null ){
             agent.SetDestination(waypoints[waypointIndex].transform.position);
+            animator.SetFloat("Speed", 0.8f);
 
         }
     
