@@ -26,8 +26,20 @@ public class GuardianMovement : MonoBehaviour
     private Animator animator;
 
 
+
+    private bool isShaking = false;
+    private float shakeTime = 0f;
+    public float shakeDuration = 0.0f;
+    public float shakePower = 0f;
+
+    private Vector3 originalCameraPosition;
+
+
     void Start()
     {
+        originalCameraPosition = Camera.main.transform.position;
+
+
         // fill the waypaoints array. add waypoints
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
@@ -47,6 +59,12 @@ public class GuardianMovement : MonoBehaviour
 
             animator.SetFloat("Speed", 1.5f);
 
+            if (distance <= 5f && shakeTime <=0f) {
+                animator.SetTrigger("Attack");
+                StartCameraShake();
+                shakeTime -= Time.deltaTime;
+            }
+
         }
         else
         {
@@ -65,6 +83,14 @@ public class GuardianMovement : MonoBehaviour
         }*/
 
         
+    }
+
+    public void StartCameraShake()
+    {
+        shakeTime = shakeDuration;
+        Camera.main.transform.localPosition = originalCameraPosition + Random.insideUnitSphere * shakePower;
+        
+
     }
 
     void FaceWp()
