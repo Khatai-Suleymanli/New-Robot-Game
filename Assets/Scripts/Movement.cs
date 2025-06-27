@@ -32,7 +32,7 @@ public class Movement : MonoBehaviour
     [SerializeField] float fovTransitionSpeed = 8f;
 
     float velocityY;
-    bool isGrounded;
+    public bool isGrounded;
     float jumpTimer = 0f;
     float cameraCap; //?
     Vector2 currentMouseDelta;
@@ -77,7 +77,7 @@ public class Movement : MonoBehaviour
 
     void UpdateMove()
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, 0.2f, ground);
+        isGrounded = Physics.CheckSphere(groundCheck.position, 0.1f, ground);
         jumpTimer -= Time.deltaTime;
 
         Vector2 targetDir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));

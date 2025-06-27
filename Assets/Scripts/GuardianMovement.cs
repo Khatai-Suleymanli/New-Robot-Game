@@ -61,8 +61,8 @@ public class GuardianMovement : MonoBehaviour
 
             if (distance <= 5f && shakeTime <=0f) {
                 animator.SetTrigger("Attack");
-                StartCameraShake();
-                shakeTime -= Time.deltaTime;
+                //StartCameraShake();
+                //shakeTime -= Time.deltaTime;
             }
 
         }
