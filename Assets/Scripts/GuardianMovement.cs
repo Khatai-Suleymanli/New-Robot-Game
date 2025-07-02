@@ -37,6 +37,8 @@ public class GuardianMovement : MonoBehaviour
     public float shakeDuration = 0.0f;
     public float shakePower = 0f;
 
+    private PlayerHealth playerHealth;
+
     private Vector3 originalCameraPosition;
 
 
@@ -45,6 +47,11 @@ public class GuardianMovement : MonoBehaviour
         // originalSpeed = agent.speed;
         originalCameraPosition = Camera.main.transform.position;
 
+
+        if(target != null)
+        {
+            playerHealth = target.GetComponent<PlayerHealth>();
+        }
 
         // fill the waypaoints array. add waypoints
         agent = GetComponent<NavMeshAgent>();
@@ -74,9 +81,13 @@ public class GuardianMovement : MonoBehaviour
             agent.SetDestination(target.transform.position);
             agent.speed = 6f;
 
-            animator.SetFloat("Speed", 1.5f);
+            if (distance > 5f) {
+                animator.SetFloat("Speed", 1.5f);
 
-            if (distance <= 5f)
+            }
+            
+
+            if (distance <= 5f && attackStart == 0f)
             {
                 // agent.isStopped = true;
                 // agent.velocity = Vector3.zero;
@@ -104,6 +115,8 @@ public class GuardianMovement : MonoBehaviour
 
         
     }
+    
+   
 
     private void StartAttacking()
     {
@@ -112,6 +125,9 @@ public class GuardianMovement : MonoBehaviour
         agent.isStopped = true;
         agent.speed = 0f;
         animator.SetTrigger("Attack");
+        playerHealth.TakeDamage(10);
+        Debug.Log("Attacked The player");
+
     }
 
     private IEnumerator AttackTime()
