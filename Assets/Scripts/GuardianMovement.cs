@@ -24,6 +24,11 @@ public class GuardianMovement : MonoBehaviour
     public LayerMask obstacleMask;
 
     private Animator animator;
+    
+    private bool isAttacking = false;
+    private float attackTime = 2f;
+    private float attackStart = 0f;
+    private float originalSpeed;
 
 
 
@@ -37,6 +42,7 @@ public class GuardianMovement : MonoBehaviour
 
     void Start()
     {
+        // originalSpeed = agent.speed;
         originalCameraPosition = Camera.main.transform.position;
 
 
@@ -50,6 +56,17 @@ public class GuardianMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isAttacking)
+        {
+            attackStart+=Time.deltaTime;
+            if (attackStart >= attackTime)
+            {
+                isAttacking = false;
+                attackStart = 0;
+                agent.speed = originalSpeed;
+                agent.isStopped = false;
+            }
+        }
         float distance = Vector3.Distance(target.transform.position, transform.position);
         if (CanSeePlayer())  // if canSee
         {
@@ -59,15 +76,18 @@ public class GuardianMovement : MonoBehaviour
 
             animator.SetFloat("Speed", 1.5f);
 
-            if (distance <= 5f && shakeTime <=0f) {
-                animator.SetTrigger("Attack");
-                //StartCameraShake();
-                //shakeTime -= Time.deltaTime;
+            if (distance <= 5f)
+            {
+                // agent.isStopped = true;
+                // agent.velocity = Vector3.zero;
+                // animator.SetFloat("Speed", 0f);
+                // animator.SetTrigger("Attack");
+                StartAttacking();
             }
-
         }
         else
         {
+            // agent.isStopped = false;
             FaceWp();
             if (!agent.pathPending && agent.remainingDistance < 10)
             {
@@ -83,6 +103,22 @@ public class GuardianMovement : MonoBehaviour
         }*/
 
         
+    }
+
+    private void StartAttacking()
+    {
+        isAttacking = true;
+        attackStart = 0f;
+        agent.isStopped = true;
+        agent.speed = 0f;
+        animator.SetTrigger("Attack");
+    }
+
+    private IEnumerator AttackTime()
+    {
+        agent.isStopped = true;
+        yield return new WaitForSeconds(2f);
+        agent.isStopped = false;
     }
 
     public void StartCameraShake()
