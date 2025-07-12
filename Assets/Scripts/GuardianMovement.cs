@@ -23,23 +23,33 @@ public class GuardianMovement : MonoBehaviour
 
     public LayerMask obstacleMask;
 
-    private Animator animator;
     
-    private bool isAttacking = false;
-    private float attackTime = 2f;
-    private float attackStart = 0f;
-    private float originalSpeed;
+
+    
 
 
 
-    private bool isShaking = false;
-    private float shakeTime = 0f;
-    public float shakeDuration = 0.0f;
-    public float shakePower = 0f;
 
     private PlayerHealth playerHealth;
 
     private Vector3 originalCameraPosition;
+
+
+    [Header("Blend Tree")]
+    private Animator animator;
+    private float currentSpeedBT; // speed variable for the blend tree
+    private int speedHash;
+
+    public float acceleration = 2.0f;
+    public float deceleration = 4.0f;
+
+    public float maxWalkVelocity = 0f;
+    public float maxRunVelocity = 1.0f;
+
+    private bool isAttacking = false;
+    private float attackTime = 2f;
+    private float attackStart = 0f;
+    private float originalSpeed;
 
 
     void Start()
@@ -48,7 +58,7 @@ public class GuardianMovement : MonoBehaviour
         originalCameraPosition = Camera.main.transform.position;
 
 
-        if(target != null)
+        if (target != null)
         {
             playerHealth = target.GetComponent<PlayerHealth>();
         }
@@ -58,14 +68,61 @@ public class GuardianMovement : MonoBehaviour
         animator = GetComponent<Animator>();
         //currentTarget = waypoints[1];
 
+        speedHash = Animator.StringToHash("Speed");
+
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        float distance = Vector3.Distance(target.transform.position, transform.position);
+        bool isRunning = false;
+
+        HandleAttack(); // instead of handling them in update manually
+        HandleMovementAnimation();
+
+
+
+        if (CanSeePlayer())  // if canSee
+        {
+            FacePlayer();
+
+            agent.SetDestination(target.transform.position);
+
+
+            if (distance > 5f)
+            {
+                //animator.SetFloat("Speed", 1.5f);
+                agent.speed = 6f;
+                currentSpeedBT = Mathf.Lerp(currentSpeedBT, maxRunVelocity, acceleration * Time.deltaTime);
+
+            }
+            if (distance <= 5f && attackStart == 0f) {
+                StartAttacking();
+            }
+
+
+        }
+        else
+        {
+            // agent.isStopped = false;
+            FaceWp();
+            
+            if (agent.remainingDistance < 10)
+            {
+                waypointIndex = waypointIndex == 0 ? 1 : 0;
+                Move();
+            }
+
+            currentSpeedBT = Mathf.Lerp(currentSpeedBT, maxWalkVelocity, deceleration * Time.deltaTime);
+        }
+    }
+
+    private void HandleAttack() {
         if (isAttacking)
         {
-            attackStart+=Time.deltaTime;
+            attackStart += Time.deltaTime;
             if (attackStart >= attackTime)
             {
                 isAttacking = false;
@@ -74,76 +131,37 @@ public class GuardianMovement : MonoBehaviour
                 agent.isStopped = false;
             }
         }
-        float distance = Vector3.Distance(target.transform.position, transform.position);
-        if (CanSeePlayer())  // if canSee
-        {
-            FacePlayer();
-            agent.SetDestination(target.transform.position);
-            agent.speed = 6f;
 
-            if (distance > 5f) {
-                animator.SetFloat("Speed", 1.5f);
-
-            }
-            
-
-            if (distance <= 5f && attackStart == 0f)
-            {
-                // agent.isStopped = true;
-                // agent.velocity = Vector3.zero;
-                // animator.SetFloat("Speed", 0f);
-                // animator.SetTrigger("Attack");
-                StartAttacking();
-            }
-        }
-        else
-        {
-            // agent.isStopped = false;
-            FaceWp();
-            if (!agent.pathPending && agent.remainingDistance < 10)
-            {
-                waypointIndex = waypointIndex == 0 ? 1 : 0;
-                Move();
-            }
-        }
-        /*if (distance > lookRadius)
-        {
-            
-
-
-        }*/
-
-        
     }
-    
-   
+
+
+    //Blend Tree related animation controlling
+
+    private void HandleMovementAnimation() {
+
+        //float normalizedSpeed = agent.velocity.magnitude / agent.speed;
+
+        float targetSpeed = CanSeePlayer() ? 1f : 0f;
+
+        //animator.SetFloat(speedHash, targetSpeed, 0.1f, Time.deltaTime);
+        animator.SetFloat(speedHash,currentSpeedBT);
+
+    }
 
     private void StartAttacking()
     {
         isAttacking = true;
         attackStart = 0f;
         agent.isStopped = true;
-        agent.speed = 0f;
+        currentSpeedBT = 0f;
+        //agent.speed = 0f;
         animator.SetTrigger("Attack");
         playerHealth.TakeDamage(10);
         Debug.Log("Attacked The player");
 
     }
 
-    private IEnumerator AttackTime()
-    {
-        agent.isStopped = true;
-        yield return new WaitForSeconds(2f);
-        agent.isStopped = false;
-    }
 
-    public void StartCameraShake()
-    {
-        shakeTime = shakeDuration;
-        Camera.main.transform.localPosition = originalCameraPosition + Random.insideUnitSphere * shakePower;
-        
-
-    }
 
     void FaceWp()
     {
@@ -175,7 +193,7 @@ public class GuardianMovement : MonoBehaviour
         if (agent != null && waypoints[waypointIndex] != null)
         {
             agent.SetDestination(waypoints[waypointIndex].transform.position);
-            animator.SetFloat("Speed", 0.8f);
+            //animator.SetFloat("Speed", 0.8f);
 
         }
 
@@ -211,7 +229,8 @@ public class GuardianMovement : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (target == null) {
+        if (target == null)
+        {
             return;
         }
 
