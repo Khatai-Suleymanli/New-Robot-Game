@@ -23,9 +23,9 @@ public class GuardianMovement : MonoBehaviour
 
     public LayerMask obstacleMask;
 
-    
 
-    
+
+
 
 
 
@@ -98,7 +98,8 @@ public class GuardianMovement : MonoBehaviour
                 currentSpeedBT = Mathf.Lerp(currentSpeedBT, maxRunVelocity, acceleration * Time.deltaTime);
 
             }
-            if (distance <= 5f && attackStart == 0f) {
+            if (distance <= 5f && attackStart == 0f)
+            {
                 StartAttacking();
             }
 
@@ -108,7 +109,7 @@ public class GuardianMovement : MonoBehaviour
         {
             // agent.isStopped = false;
             FaceWp();
-            
+
             if (agent.remainingDistance < 10)
             {
                 waypointIndex = waypointIndex == 0 ? 1 : 0;
@@ -119,7 +120,8 @@ public class GuardianMovement : MonoBehaviour
         }
     }
 
-    private void HandleAttack() {
+    private void HandleAttack()
+    {
         if (isAttacking)
         {
             attackStart += Time.deltaTime;
@@ -137,14 +139,15 @@ public class GuardianMovement : MonoBehaviour
 
     //Blend Tree related animation controlling
 
-    private void HandleMovementAnimation() {
+    private void HandleMovementAnimation()
+    {
 
         //float normalizedSpeed = agent.velocity.magnitude / agent.speed;
 
         float targetSpeed = CanSeePlayer() ? 1f : 0f;
 
         //animator.SetFloat(speedHash, targetSpeed, 0.1f, Time.deltaTime);
-        animator.SetFloat(speedHash,currentSpeedBT);
+        animator.SetFloat(speedHash, currentSpeedBT);
 
     }
 
